@@ -1,0 +1,132 @@
+% ^^A -*- japanese-latex -*-
+%
+% \ifx\epTeXinputencoding\undefined\else
+%   \epTeXinputencoding utf8
+% \fi
+% \iffalse
+%<*driver>
+\ifx\epTeXinputencoding\undefined\else
+  \epTeXinputencoding utf8
+\fi
+%</driver>
+%
+%   bellsmacros.dtx
+%
+%<*driver>
+\documentclass[uplatex,a4paper,12Q,dvipdfmx]{jsarticle}
+%\documentclass[lualatex,a4paper,12Q]{jlreq}
+\usepackage{doc}
+\usepackage{ifptex}
+\ifptex
+  \xspcode"5C=1 %% \
+  \xspcode"22=1 %% "
+\fi
+\addtolength{\textwidth}{-1in}
+\addtolength{\evensidemargin}{1in}
+\addtolength{\oddsidemargin}{1in}
+\addtolength{\marginparwidth}{1in}
+\setlength\marginparpush{0pt}
+\usepackage{etoolbox}
+% \usepackage{listings}
+% \ifptex
+%   \usepackage{jlisting}
+% \fi
+\usepackage{color}
+\usepackage{xspace}
+\usepackage{ifpdf}
+\usepackage{hyperref}
+\ifptex
+  \usepackage{pxjahyper}
+\fi
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\definecolor{myblue}{rgb}{0,0,0.75}
+\definecolor{mygreen}{rgb}{0,0.45,0}
+\CodelineNumbered
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges % Gather update information
+\setcounter{StandardModuleDepth}{1}
+
+\def\TikZ{Ti\textsl{k}Z}
+\newcommand*{\Lcount}[1]{\textsl{\small#1}}
+\newcommand*{\Lopt}[1]{\textsf{#1}}
+\newcounter{@clineno}
+\def\mlineplus#1{\setcounter{@clineno}{\arabic{CodelineNo}}%
+   \addtocounter{@clineno}{#1}\arabic{@clineno}}
+\makeatletter
+\DeclareRobustCommand{\cmd}[1]{\cs{\expandafter\cmd@to@cs\string#1}}
+\def\cmd@to@cs#1#2{\char\number`#2\relax}
+\makeatother
+\DeclareRobustCommand{\cs}[1]{\texttt{\char`\\#1}}
+\providecommand{\marg}[1]{%
+  {\ttfamily\char`\{}\meta{#1}{\ttfamily\char`\}}}
+\providecommand{\oarg}[1]{%
+  {\ttfamily[}\meta{#1}{\ttfamily]}}
+\newrobustcmd*{\env}[1]{\mbox{\ttfamily#1}}
+\newrobustcmd*{\file}[1]{\mbox{\ttfamily#1}}
+\newrobustcmd*{\prm}[1]{
+  \ifblank{#1}
+    {}
+    {\mbox{%
+       \ensuremath\langle
+       \normalfont\textit{#1}%
+       \ensuremath\rangle}}}
+
+\usepackage{bellsmacros}
+\hypersetup{colorlinks,hyperfootnotes=false,linkcolor=myblue,urlcolor=mygreen}
+
+\GetFileInfo{bellsloadingpkgs.sty}
+\begin{document}
+  \DocInput{bellsloadingpkgs.dtx}
+\end{document}
+%</driver>
+%
+% \fi
+% \changes{v1.0}{2019/10/29}
+%   {make this .dtx file}
+% \title{bellsloadingpkgs}
+% \author{bell}
+% \date{\filedate}
+% \maketitle
+% \tableofcontents
+%
+% \MakeShortVerb{\|}
+%
+% \StopEventually{}
+% \section{実装}
+%    \begin{macrocode}
+%<*bellsmacros>
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{bellsloadingpkgs}[2020/01/25 bell's loading packages]
+%%==============================================================================
+\RequirePackageWithOptions{bellsmacros}
+\RequirePackage{braket}
+\RequirePackage{cases}
+\RequirePackage{comment}
+\RequirePackage{etoolbox}
+\RequirePackage{enumitem}
+\RequirePackage{float}
+%% \RequirePackage{ifptex}% loaded in bellsmacros.sty
+\RequirePackage{tensor}
+\RequirePackage{everyhook}
+\ifptex
+  \RequirePackage[utf8]{inputenc}
+  \RequirePackage[prefernoncjk]{pxcjkcat}
+  \cjkcategory{sym18}{cjk}% Geometric Shapes: U+25A0--U+25FF
+  \cjkcategory{sym19}{cjk}% Miscellaneous Symbols: U+2600--U+26FF
+  \cjkcategory{※}{cjk}% General Punctuation: U+2000--U+206F
+\fi
+\RequirePackage{pxrubrica}
+\endinput
+%    \end{macrocode}
+%
+% 以上で終わりです.
+%
+%    \begin{macrocode}
+%</bellsmacros>
+\endinput
+%    \end{macrocode}
+%
+%
+% \Finale
