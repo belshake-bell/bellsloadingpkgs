@@ -98,14 +98,23 @@
 %    \begin{macrocode}
 %<*bellsloadingpkgs>
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{bellsloadingpkgs}[2020/01/25 bell's loading packages]
+\ProvidesPackage{bellsloadingpkgs}%
+  [2020/06/25 bell's loading packages]
+% [2020/01/25 bell's loading packages]
 %%==============================================================================
 \RequirePackageWithOptions{bellsmacros}
 \RequirePackage{braket}
 \RequirePackage{cases}
 \RequirePackage{comment}
 \RequirePackage{etoolbox}
-\RequirePackage{enumitem}
+%    \end{macrocode}
+% [2020/06/25]
+% enumitemパッケージはdescription環境の調整がめんどそうなので一時的に
+% 取り除きます．
+%    \begin{macrocode}
+% \RequirePackage{enumitem}
+%    \end{macrocode}
+%    \begin{macrocode}
 \RequirePackage{float}
 %% \RequirePackage{ifptex}% loaded in bellsmacros.sty
 \RequirePackage{tensor}
