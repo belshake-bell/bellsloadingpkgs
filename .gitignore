@@ -1,0 +1,8 @@
+*.pdf
+*.dvi
+*.gz
+*.cls
+*.sty
+*.txt
+logs/
+*.bat
