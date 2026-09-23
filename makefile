@@ -1,27 +1,49 @@
 TEXMFLOCAL := $(shell kpsewhich --var-value=TEXMFlocal)
-STRIPTARGET = bellsloadingpkgs.sty
-DOCTARGET = bellsloadingpkgs
-PDFTARGET = bellsloadingpkgs.pdf
-DVITARGET = bellsloadingpkgs.dvi
+TARGET      = bellsloadingpkgs
+STRIPTARGET = $(addsuffix .sty,$(TARGET))
+PDFTARGET   = $(addsuffix .pdf,$(TARGET))
+DVITARGET   = $(addsuffix .dvi,$(TARGET))
+LOGSUFFIXES = .aux .log .toc .mx1 .mx2 .bcf .bbl .blg .idx .ind .glo .gls .ilg .glg .out .run.xml .hd
+LATEXOpt   := -interaction batchmode
+UPMENDEXOpt = -q
+LATEXENGINE := uplatex
+DVIWARE := dvipdfmx
+DVIPDFMxOpt =
 
-default: $(STRIPTARGET) $(DVITARGET)
+define move
+	$(foreach tempsuffix,$(LOGSUFFIXES),$(call movebase,$1,$(tempsuffix)))
+
+endef
+define movebase
+	@if [ -e $(addsuffix $2,$1) ]; then mv $(addsuffix $2,$1) ./logs; fi
+
+endef
+
+all: $(STRIPTARGET) $(PDFTARGET) movelog
 strip: $(STRIPTARGET)
-all: $(STRIPTARGET) $(PDFTARGET)
 
 bellsloadingpkgs.sty: bellsloadingpkgs.dtx
 	pdflatex bellsloadingpkgs.ins
 
-
-.SUFFIXES: .dtx .dvi .pdf
-.dtx.dvi:
-	uplatex $<
-	makeindex -s gind.ist $(basename $<)
-	makeindex -s gglo.ist -o $(addsuffix .gls,$(basename $<)) $(addsuffix .glo,$(basename $<))
-	uplatex -synctex=1 $<
-.dvi.pdf:
-	dvipdfmx $<
-
 .PHONY: clean cleanstrip cleanall cleandoc movelog install
+.SUFFIXES: .dtx .dvi .pdf
+
+%.dvi: %.dtx
+	uplatex $(LATEXOpt) $(notdir $<)
+	if [ -e $(addsuffix .idx,$(basename $(notdir $<))) ]; then $(MAKE) -B $(addsuffix .ind,$(basename $(notdir $<))); fi
+	if [ -e $(addsuffix .glo,$(basename $(notdir $<))) ]; then $(MAKE) -B $(addsuffix .gls,$(basename $(notdir $<))); fi
+	uplatex $(LATEXOpt) -synctex=1 $<
+
+%.pdf: %.dvi
+	dvipdfmx $(DVIPDFMxOpt) $(notdir $<)
+
+%.ind: %.idx
+	makeindex $(UPMENDEXOpt) -s gind.ist $(notdir $<)
+
+%.gls: %.glo
+	makeindex $(UPMENDEXOpt) -s gglo.ist -o $(notdir $@) -t $(addsuffix .glg,$(basename $(notdir $<))) $(notdir $<)
+
+
 install: $(STRIPTARGET) $(PDFTARGET)
 	mkdir -p $(TEXMFLOCAL)/tex/platex/bellMacros
 	install $(STRIPTARGET) $(TEXMFLOCAL)/tex/platex/bellMacros
@@ -30,39 +52,24 @@ install: $(STRIPTARGET) $(PDFTARGET)
 
 clean:
 	rm -f $(DVITARGET) \
-	$(addsuffix .idx,$(DOCTARGET)) \
-	$(addsuffix .ind,$(DOCTARGET)) \
-	$(addsuffix .ilg,$(DOCTARGET)) \
-	$(addsuffix .glo,$(DOCTARGET)) \
-	$(addsuffix .gls,$(DOCTARGET)) \
-	$(addsuffix .aux,$(DOCTARGET)) \
-	$(addsuffix .toc,$(DOCTARGET)) \
-	$(addsuffix .log,$(DOCTARGET))
+	$(addprefix $(TARGET),$(LOGSUFFIXES))
 
 cleanall:
 	rm -f $(PDFTARGET) \
-	$(STRIPTARGET) \
-	make clean
+	$(STRIPTARGET)
+	$(MAKE) clean
 
 movebuild:
+	@mkdir -p ./build
 	if [ -e $(STRIPTARGET) ]; then mv $(STRIPTARGET) ./build; fi
 	if [ -e $(PDFTARGET) ]; then mv $(PDFTARGET) ./build; fi
-	if [ -e $(DOCTARGET).synctex.gz ]; then mv $(DOCTARGET).synctex.gz ./build; fi
+	if [ -e $(TARGET).synctex.gz ]; then mv $(TARGET).synctex.gz ./build; fi
 	if [ -e $(DVITARGET) ]; then mv $(DVITARGET) ./build; fi
 
 movelog:
-	if [ -e $(DOCTARGET).aux ]; then mv $(DOCTARGET).aux ./logs; fi
-	if [ -e $(DOCTARGET).log ]; then mv $(DOCTARGET).log ./logs; fi
-	if [ -e $(DOCTARGET).toc ]; then mv $(DOCTARGET).toc ./logs; fi
-	if [ -e $(DOCTARGET).mx1 ]; then mv $(DOCTARGET).mx1 ./logs; fi
-	if [ -e $(DOCTARGET).mx2 ]; then mv $(DOCTARGET).mx2 ./logs; fi
-	if [ -e $(DOCTARGET).bcf ]; then mv $(DOCTARGET).bcf ./logs; fi
-	if [ -e $(DOCTARGET).bbl ]; then mv $(DOCTARGET).bbl ./logs; fi
-	if [ -e $(DOCTARGET).blg ]; then mv $(DOCTARGET).blg ./logs; fi
-	if [ -e $(DOCTARGET).idx ]; then mv $(DOCTARGET).idx ./logs; fi
-	if [ -e $(DOCTARGET).ind ]; then mv $(DOCTARGET).ind ./logs; fi
-	if [ -e $(DOCTARGET).glo ]; then mv $(DOCTARGET).glo ./logs; fi
-	if [ -e $(DOCTARGET).gls ]; then mv $(DOCTARGET).gls ./logs; fi
-	if [ -e $(DOCTARGET).ilg ]; then mv $(DOCTARGET).ilg ./logs; fi
-	if [ -e $(DOCTARGET).out ]; then mv $(DOCTARGET).out ./logs; fi
-	if [ -e $(DOCTARGET).run.xml ]; then mv $(DOCTARGET).run.xml ./logs; fi
+	@mkdir -p ./logs
+	$(foreach temp,$(TARGET),$(call move,$(temp)))
+
+makelog:
+	@git log --graph --date=short --all --pretty="format:(%C(yellow)%h) %C(cyan)%ad \"%C(green)%an\"%C(reset)%x09%C(red)%d%C(reset) %s" 1> "log_all.gitlog"
+	@git log --graph --date=short       --pretty="format:(%C(yellow)%h) %C(cyan)%ad \"%C(green)%an\"%C(reset)%x09%C(red)%d%C(reset) %s" 1> "log.gitlog"

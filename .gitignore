@@ -6,3 +6,4 @@
 *.txt
 logs/
 *.bat
+*.gitlog
